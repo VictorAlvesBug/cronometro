@@ -1,10 +1,14 @@
-import React, { useState } from 'react';
+import { useMachine } from '@xstate/react';
 import useFormatarDisplay from './hooks/formatadorDisplay';
-import useCronometroMachine from './hooks/cronometroMachine';
+import cronometroMachine, { TContexto, TEnviar } from './hooks/cronometroMachine';
+
 
 function App() {
-  const [contexto, enviar] = useCronometroMachine();
-  
+  let useCronometroMachine = useMachine(cronometroMachine);
+
+  const contexto: TContexto = useCronometroMachine[0].context;
+  const enviar: TEnviar = useCronometroMachine[1];
+
   let botaoEsquerdo = null;
 
   switch (contexto.estado) {
@@ -13,7 +17,7 @@ function App() {
         <button
           className="botao-verde"
           type="button"
-          onClick={() => enviar('INICIAR')}
+          onClick={() => enviar('RODAR')}
         >
           INICIAR
         </button>
@@ -37,7 +41,7 @@ function App() {
         <button
           className="botao-verde"
           type="button"
-          onClick={() => enviar('CONTINUAR')}
+          onClick={() => enviar('RODAR')}
         >
           CONTINUAR
         </button>
