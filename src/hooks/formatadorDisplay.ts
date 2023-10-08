@@ -1,8 +1,8 @@
-const extrairTrecho = (numero: number, base: number) => {
-    const largura = String(base - 1).length
+const extrairTrecho = (numero: number, base: number, largura: number = 2) => {
+    //const largura = String(base - 1).length
     const trechoMilis = numero % base;
     const valorRestante = (numero - trechoMilis) / base;
-    const strTrecho = String(trechoMilis).padStart(largura, '0');
+    const strTrecho = String(trechoMilis).padStart(largura, '0').substring(0, largura);
     return [strTrecho, valorRestante] as [string, number];
   };
 

@@ -1,49 +1,32 @@
-import { useMachine } from '@xstate/react';
 import useFormatarDisplay from './hooks/formatadorDisplay';
-import cronometroMachine, { TContexto, TEnviar } from './hooks/cronometroMachine';
-
+import useCronometroMachine from './hooks/cronometroMachine';
 
 function App() {
-  let useCronometroMachine = useMachine(cronometroMachine);
-
-  const contexto: TContexto = useCronometroMachine[0].context;
-  const enviar: TEnviar = useCronometroMachine[1];
+  const [contexto, enviar] = useCronometroMachine();
 
   let botaoEsquerdo = null;
 
   switch (contexto.estado) {
     case 'zerado':
       botaoEsquerdo = (
-        <button
-          className="botao-verde"
-          type="button"
-          onClick={() => enviar('RODAR')}
-        >
-          INICIAR
+        <button className="botao-verde" onClick={() => enviar('RODAR')}>
+          START
         </button>
       );
       break;
 
     case 'rodando':
       botaoEsquerdo = (
-        <button
-          className="botao-vermelho"
-          type="button"
-          onClick={() => enviar('PARAR')}
-        >
-          PARAR
+        <button className="botao-vermelho" onClick={() => enviar('PARAR')}>
+          STOP
         </button>
       );
       break;
 
     case 'pausado':
       botaoEsquerdo = (
-        <button
-          className="botao-verde"
-          type="button"
-          onClick={() => enviar('RODAR')}
-        >
-          CONTINUAR
+        <button className="botao-verde" onClick={() => enviar('RODAR')}>
+          RESUME
         </button>
       );
       break;
@@ -57,12 +40,8 @@ function App() {
         </div>
         <div className="botoes bg-gray-100 w-full h-1/3 flex flex-row justify-center gap-1 pt-1">
           {botaoEsquerdo}
-          <button
-            className="botao-cinza"
-            type="button"
-            onClick={() => enviar('ZERAR')}
-          >
-            LIMPAR
+          <button className="botao-cinza" onClick={() => enviar('ZERAR')}>
+            CLEAR
           </button>
         </div>
       </div>

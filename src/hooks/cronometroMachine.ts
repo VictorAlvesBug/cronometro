@@ -1,17 +1,16 @@
 import { createMachine, actions } from 'xstate';
+import { useMachine } from '@xstate/react';
 
 const { assign: sharedAssign } = actions;
 
 type TEstado = 'zerado' | 'rodando' | 'pausado';
 
-export type TContexto = {
+type TContexto = {
     estado: TEstado;
     segundos: number;
 };
 
-export type TEnviar = (acao: 'RODAR' | 'PARAR' | 'ZERAR') => void;
-
-const incrementoSegundos = 1 / 64;
+const incrementoSegundos = 1 / 32;
 
 const cronometroMachine = createMachine({
     /** @xstate-layout N4IgpgJg5mDOIC5QGMBOB7AdugtmALhgHQBeYqAhhOgMQCSAcnQMJ0CCASgNoAMAuolAAHdLACW+MVkEgAHogAsAJgCcRAKwBmAIxL1AGhABPRNoDsADiJn1AX1uG0WXAWIYIFTNRoAFTp14BJBARcUlpYPkEBU0ANiJNJQtdA2NFWLN7RwxsPEJ0IndPbwAtAFEOAP4ZUIkpTBkomLMNWL1DEwRkjSyQJ1zXAqEKAFdYKlpmAHkGABVGAFUqoOFROojQKO1YqxsOxESlIgsbXv6XfKJhsYmacsruauDa8IbI0x3rVM6Toh4LTSAoHAzQKewOEDYCBwGTnPIYGprV6NRAAWli+wQ6LOOQuxDIlGoiLC9RRCB0LS0KUx2m0PCIKnUAJBwLBELhg0K6A8XnQxPWb02iHUIuOKh4bW+iCUPBaKlO7Nx8KGo3GROeSNJ72iShpSm0xxZLLZ9iAA */
@@ -21,7 +20,6 @@ const cronometroMachine = createMachine({
     context: {
         estado: 'zerado',
         segundos: 0,
-        //loop: null
     } as TContexto,
     states: {
         zerado: {
@@ -34,13 +32,21 @@ const cronometroMachine = createMachine({
         },
         rodando: {
             invoke: {
-            src: (context) => (cb) => {
-              const interval = setInterval(() => {
-                cb('TICK');
-              }, 1000 * incrementoSegundos);
-    
+            src: _ => (cb) => {
+                let start = Date.now();
+                let handle = requestAnimationFrame(check);
+
+                function check(){
+                    if(start + (1000*incrementoSegundos) >= Date.now()){
+                    } else {
+                        cb('TICK');
+                        start = Date.now();
+                    }
+                    handle = requestAnimationFrame(check);
+                }
+
               return () => {
-                clearInterval(interval);
+                cancelAnimationFrame(handle);
               };
             }
           },
@@ -91,4 +97,13 @@ const cronometroMachine = createMachine({
     }
 });
 
-export default cronometroMachine;
+function useCronometroMachine(){
+    let [current, enviar] = useMachine(cronometroMachine);
+
+  const contexto: TContexto = current.context;
+
+  type TEnviar = (acao: 'RODAR' | 'PARAR' | 'ZERAR') => void;
+  return [contexto, enviar] as [TContexto, TEnviar];
+}
+
+export default useCronometroMachine;
